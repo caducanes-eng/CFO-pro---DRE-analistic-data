@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { MonthlyDRE, MonthlyParsedData } from '../../types';
 import Button from '../ui/Button';
+import Input from '../ui/Input';
 import { v4 as uuidv4 } from 'uuid';
-import { X, Sparkles, LayoutGrid, CheckCircle2 } from 'lucide-react';
+import { X, Sparkles, LayoutGrid, CheckCircle2, CalendarDays } from 'lucide-react';
 
 // Utilitário de limpeza de dados financeiros brasileiros
 const parseBRL = (v: string): number => {
@@ -51,8 +52,6 @@ const extractDataFromRawString = (raw: string): Partial<MonthlyParsedData> => {
   lines.forEach(line => {
     mappings.forEach(map => {
       if (map.regex.test(line)) {
-        // Encontra todos os padrões numéricos na linha (ex: 4,00% e 2.090,43)
-        // Regex busca grupos de números que podem ou não terminar em %
         const matches = line.match(/([\d\.,]+)\s*(%|R\$)?/g);
         
         if (matches) {
@@ -105,6 +104,13 @@ const MonthlyEntryForm: React.FC<any> = ({ initialData, onSave, onCancel }) => {
     }));
   };
 
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      monthYear: e.target.value
+    }));
+  };
+
   const fieldGroups = [
     { 
       title: "Financeiro Consolidado (R$)", 
@@ -132,6 +138,20 @@ const MonthlyEntryForm: React.FC<any> = ({ initialData, onSave, onCancel }) => {
 
   return (
     <div className="space-y-4">
+      {/* Seletor de Competência - Nova Adição */}
+      <div className="bg-brand-surface border border-white/5 p-3 rounded-2xl flex items-center gap-3">
+        <CalendarDays size={18} className="text-brand-primary shrink-0" />
+        <div className="flex-grow">
+          <label className="text-[8px] font-black uppercase text-white/30 tracking-widest block mb-1">Mês de Referência da DRE</label>
+          <input 
+            type="month" 
+            value={formData.monthYear}
+            onChange={handleMonthChange}
+            className="w-full !bg-transparent !border-none !p-0 !text-white !font-black !text-sm focus:!ring-0 cursor-pointer"
+          />
+        </div>
+      </div>
+
       {/* Terminal Smart Paste - Destaque Neon */}
       <div className="bg-brand-surface border-2 border-brand-primary/20 p-4 rounded-2xl shadow-[0_0_30px_rgba(212,175,55,0.05)]">
         <div className="flex justify-between items-center mb-3">
@@ -160,13 +180,10 @@ const MonthlyEntryForm: React.FC<any> = ({ initialData, onSave, onCancel }) => {
             </button>
           )}
         </div>
-        <p className="text-[9px] text-white/30 font-bold uppercase mt-2 tracking-widest text-center">
-          O motor detectará automaticamente valores em Moeda e Porcentagem na mesma linha.
-        </p>
       </div>
 
-      {/* Grid de Conferência - Foco em Nitidez */}
-      <div className="max-h-[45vh] overflow-y-auto pr-1 space-y-4 custom-scrollbar">
+      {/* Grid de Conferência */}
+      <div className="max-h-[40vh] overflow-y-auto pr-1 space-y-4 custom-scrollbar">
         {fieldGroups.map(group => (
           <div key={group.title} className="bg-brand-surface/60 p-4 rounded-2xl border border-white/5">
             <h4 className="text-[10px] font-black uppercase text-brand-primary/80 mb-4 tracking-[0.25em] flex items-center gap-2 border-b border-white/5 pb-2">
