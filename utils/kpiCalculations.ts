@@ -31,12 +31,11 @@ export const getMonthlyChartData = (monthlyDREs: MonthlyDRE[]): { name: string; 
 };
 
 // --- LÓGICA DE AGREGAÇÃO (SOMA E MÉDIA PARA MÚLTIPLOS MESES) ---
-// Modificado para AGREGAR A MÉDIA DE TODAS AS DREs na base fornecida
 const aggregateDREs = (dres: MonthlyDRE[]): MonthlyParsedData => {
-  const periodData = dres; // Agora considera todas as DREs fornecidas
+  const periodData = dres;
 
   if (periodData.length === 0) {
-    return { // Retorna um objeto padrão com zeros se não houver dados
+    return {
       grossRevenue: 0, netRevenue: 0, cmv: 0, markup: 0, contributionMarginPercent: 0,
       commissions: 0, cardFees: 0, marketingAds: 0, freight: 0,
       personnelCost: 0, occupancyCost: 0, adminCost: 0, marketingInst: 0,
@@ -47,7 +46,6 @@ const aggregateDREs = (dres: MonthlyDRE[]): MonthlyParsedData => {
     } as MonthlyParsedData;
   }
 
-  // Soma de todos os campos
   const sumAllFields = periodData.reduce((acc, curr) => {
     const d = curr.parsedData;
     return {
@@ -71,8 +69,6 @@ const aggregateDREs = (dres: MonthlyDRE[]): MonthlyParsedData => {
       returns: (acc.returns || 0) + (d.returns || 0),
       depreciation: (acc.depreciation || 0) + (d.depreciation || 0),
       contributionMarginValue: (acc.contributionMarginValue || 0) + (d.contributionMarginValue || 0),
-
-      // Campos percentuais para serem AVERAGE
       markup: (acc.markup || 0) + (d.markup || 0),
       contributionMarginPercent: (acc.contributionMarginPercent || 0) + (d.contributionMarginPercent || 0),
       taxesPercent: (acc.taxesPercent || 0) + (d.taxesPercent || 0),
@@ -89,14 +85,8 @@ const aggregateDREs = (dres: MonthlyDRE[]): MonthlyParsedData => {
   }, {} as MonthlyParsedData);
 
   const avgCount = periodData.length;
-  if (avgCount === 0) return {} as MonthlyParsedData; // Should be handled by initial check
+  const result: MonthlyParsedData = { ...sumAllFields };
 
-  // Divide os campos pela quantidade de meses para obter a média
-  const result: MonthlyParsedData = {
-    ...sumAllFields, // Inclui todos os campos somados
-  };
-
-  // Iterar sobre todos os campos e dividir pelo avgCount
   (Object.keys(result) as Array<keyof MonthlyParsedData>).forEach(key => {
     const value = result[key];
     if (typeof value === 'number') {
@@ -107,12 +97,7 @@ const aggregateDREs = (dres: MonthlyDRE[]): MonthlyParsedData => {
   return result;
 };
 
-// Helper para obter agregados diários para um mês específico
-const getDailyAggregatesForMonth = (
-  allDailyRegisters: DailyRegister[],
-  year: number,
-  month: number // 0-indexed
-) => {
+const getDailyAggregatesForMonth = (allDailyRegisters: DailyRegister[], year: number, month: number) => {
   const filteredRegs = allDailyRegisters.filter(r => {
     const regDate = new Date(r.date + 'T00:00:00');
     return regDate.getMonth() === month && regDate.getFullYear() === year;
@@ -122,34 +107,23 @@ const getDailyAggregatesForMonth = (
   const descontosAcumulados = filteredRegs.reduce((acc, curr) => acc + (curr.discount || 0), 0);
   const devolucoesAcumuladas = filteredRegs.reduce((acc, curr) => acc + (curr.returns || 0), 0);
   const clientesAcumulados = filteredRegs.reduce((acc, curr) => acc + (curr.customers || 0), 0);
-  const diasDecorridos = filteredRegs.length > 0 ? (new Date(filteredRegs[filteredRegs.length - 1].date).getDate()) : 0; // Último dia registrado para o mês
-  const diasNoMes = (new Date(year, month + 1, 0)).getDate(); // Total de dias no mês
+  const diasDecorridos = filteredRegs.length > 0 ? (new Date(filteredRegs[filteredRegs.length - 1].date).getDate()) : 0;
+  const diasNoMes = (new Date(year, month + 1, 0)).getDate();
   const diasRestantes = Math.max(0, diasNoMes - diasDecorridos);
 
-  return {
-    faturamentoAcumulado,
-    descontosAcumulados,
-    devolucoesAcumuladas,
-    clientesAcumulados,
-    diasDecorridos,
-    diasNoMes,
-    diasRestantes,
-    hasData: filteredRegs.length > 0,
-  };
+  return { faturamentoAcumulado, descontosAcumulados, devolucoesAcumuladas, clientesAcumulados, diasDecorridos, diasNoMes, diasRestantes, hasData: filteredRegs.length > 0 };
 };
 
-// Helper principal para calcular o valor de um KPI em um determinado contexto (DRE ou diário)
 const calculateKpiValueFromContext = (
   kpiId: string,
   dre: MonthlyParsedData | null,
   dailyAggs: ReturnType<typeof getDailyAggregatesForMonth> | null,
-  metaMediaB2: number | null, // Meta de Receita Bruta Média para KPIs diários
-  peFinanceiroTotal: number | null, // P.E. Financeiro Total para KPIs diários
-  comparisonContext?: { currentDRE?: MonthlyParsedData, previousDRE?: MonthlyParsedData } // Para Alavancagem Op. e Taxa Crescimento
+  metaMediaB2: number | null,
+  peFinanceiroTotal: number | null,
+  comparisonContext?: { currentDRE?: MonthlyParsedData, previousDRE?: MonthlyParsedData }
 ): number | null => {
 
   if (kpiId.startsWith('kpi_daily_') || kpiId === 'kpi_discount_impact' || kpiId === 'kpi_return_rate' || kpiId === 'kpi_average_ticket') {
-    // KPIs de Performance Diária
     if (!dailyAggs || !dailyAggs.hasData) return null;
     const { faturamentoAcumulado, descontosAcumulados, devolucoesAcumuladas, clientesAcumulados, diasDecorridos, diasNoMes, diasRestantes } = dailyAggs;
 
@@ -165,7 +139,6 @@ const calculateKpiValueFromContext = (
       default: return null;
     }
   } else if (dre) {
-    // KPIs de Saúde Financeira (baseados em DRE)
     const B2 = dre.grossRevenue || 0;
     const B7 = dre.netRevenue || 0;
     const B9_pct = dre.markup || 0;
@@ -196,29 +169,29 @@ const calculateKpiValueFromContext = (
       case 'kpi_survival_index': return round(safeDivide(B27, totalDespesasFixas));
       case 'kpi_gross_margin': return round(C11);
       case 'kpi_cmv_revenue': return round(safeDivide(B10, B7) * 100);
-      case 'kpi_payroll_cost': return round(B19); // R$
+      case 'kpi_payroll_cost': return round(B19);
       case 'kpi_occupancy_cost': return round(C20);
       case 'kpi_commission_weight': return round(C13);
       case 'kpi_card_fees': return round(B14_pct);
       case 'kpi_admin_cost': return round(C21);
       case 'kpi_breakeven_financial': return peFinanceiroDRE;
       case 'kpi_safety_margin': return round(safeDivide((B2 || 0) - (peFinanceiroDRE || 0), B2) * 100);
-      case 'kpi_ebitda': return round(B23); // R$
-      case 'kpi_operating_profitability': return round(safeDivide(safeDivide(B23, B7), B2) * 100);
+      case 'kpi_ebitda': return round(B23);
+      // CORREÇÃO: Lucratividade Operacional (%) = (EBITDA / Receita Bruta) * 100
+      case 'kpi_operating_profitability': return round(safeDivide(B23, B2) * 100);
       case 'kpi_operating_leverage':
         if (comparisonContext?.currentDRE && comparisonContext?.previousDRE) {
           const currentNetProfit = comparisonContext.currentDRE.netProfit || 0;
           const previousNetProfit = comparisonContext.previousDRE.netProfit || 0;
           const currentGrossRevenue = comparisonContext.currentDRE.grossRevenue || 0;
           const previousGrossRevenue = comparisonContext.previousDRE.grossRevenue || 0;
-
           const variacaoLucro = calculateTrend(currentNetProfit, previousNetProfit);
           const variacaoVendas = calculateTrend(currentGrossRevenue, previousGrossRevenue);
           return round(safeDivide(variacaoLucro, variacaoVendas));
         }
         return null;
       case 'kpi_marketing_investment': return round(safeDivide((B16 || 0) + (B22 || 0), B2) * 100);
-      case 'kpi_net_profit': return round(B27); // R$
+      case 'kpi_net_profit': return round(B27);
       case 'kpi_growth_rate':
         if (comparisonContext?.currentDRE && comparisonContext?.previousDRE) {
           return calculateTrend(comparisonContext.currentDRE.grossRevenue, comparisonContext.previousDRE.grossRevenue);
@@ -230,41 +203,24 @@ const calculateKpiValueFromContext = (
   return null;
 };
 
-
-// --- ENGINE PRINCIPAL ---
 export const calculateAllKpis = (
   dailyRegisters: DailyRegister[],
-  monthlyDREs: MonthlyDRE[], // Assumed to be sorted descending by monthYear (mais recente primeiro)
-  filterMonths: number = 1 // Este parâmetro agora COMANDA a agregação para KPIs de Saúde Financeira
+  monthlyDREs: MonthlyDRE[],
+  filterMonths: number = 1
 ): { kpis: KPI[]; auditoriaMeta: AuditoriaMeta; } => {
   const kpisWithValues: KPI[] = [];
-
-  // Sort DREs oldest to newest for consistent slicing
   const sortedMonthlyDREs = [...monthlyDREs].sort((a, b) => a.monthYear.localeCompare(b.monthYear));
-
-  // Determine actual number of months to filter (n)
   const nFiltered = Math.min(filterMonths, sortedMonthlyDREs.length);
-
-  // Slice DREs for current and previous filtered periods
   const currentPeriodDREs = sortedMonthlyDREs.slice(-nFiltered);
-  const previousPeriodDREs = sortedMonthlyDREs.slice(-(nFiltered * 2), -nFiltered); // Get the N months before current N months
-
-  // Aggregate DREs for current and previous filtered periods
+  const previousPeriodDREs = sortedMonthlyDREs.slice(-(nFiltered * 2), -nFiltered);
   const currentPeriodAggregatedDRE = aggregateDREs(currentPeriodDREs);
   const previousPeriodAggregatedDRE = aggregateDREs(previousPeriodDREs);
-
-  // Current Month Daily Aggregates (for daily KPIs)
   const today = new Date();
   const currentMonthAggs = getDailyAggregatesForMonth(dailyRegisters, today.getFullYear(), today.getMonth());
-
-  // Previous Month Daily Aggregates (for M-o-M comparison of daily KPIs)
   const previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const previousMonthAggs = getDailyAggregatesForMonth(dailyRegisters, previousMonthDate.getFullYear(), previousMonthDate.getMonth());
-
-  // Pre-calculate values common for all KPIs based on the current filtered period
-  const metaMediaB2 = currentPeriodAggregatedDRE.grossRevenue; // Receita Bruta Média do período filtrado
+  const metaMediaB2 = currentPeriodAggregatedDRE.grossRevenue;
   const peFinanceiroTotal = calculateKpiValueFromContext('kpi_breakeven_financial', currentPeriodAggregatedDRE, null, null, null);
-
 
   for (const kpiTemplate of ALL_KPIS) {
     let value: number | null = null;
@@ -273,56 +229,24 @@ export const calculateAllKpis = (
     let comparisonIsFavorable: boolean | null = null;
     let comparisonColorClass: string | null = null;
 
-    // --- Calcula o Valor Principal do KPI ---
     if (kpiTemplate.category === 'Performance Diária') {
       value = calculateKpiValueFromContext(kpiTemplate.id, null, currentMonthAggs, metaMediaB2, peFinanceiroTotal);
-    } else { // Saúde Financeira - usa a agregação do período filtrado
-      value = calculateKpiValueFromContext(
-        kpiTemplate.id,
-        currentPeriodAggregatedDRE,
-        null, // dailyAggs não aplicável
-        metaMediaB2,
-        peFinanceiroTotal,
-        {
-          currentDRE: currentPeriodAggregatedDRE,
-          previousDRE: previousPeriodAggregatedDRE.grossRevenue !== 0 ? previousPeriodAggregatedDRE : null, // Pass previous only if it has data
-        }
-      );
+    } else {
+      value = calculateKpiValueFromContext(kpiTemplate.id, currentPeriodAggregatedDRE, null, metaMediaB2, peFinanceiroTotal, { currentDRE: currentPeriodAggregatedDRE, previousDRE: previousPeriodAggregatedDRE.grossRevenue !== 0 ? previousPeriodAggregatedDRE : undefined });
     }
 
-
-    // --- Calcula a Comparação (TrendText) ---
     const isCostKpi = COST_KPI_IDS.includes(kpiTemplate.id);
 
     if (kpiTemplate.category === 'Saúde Financeira' && currentPeriodAggregatedDRE.grossRevenue !== 0 && previousPeriodAggregatedDRE.grossRevenue !== 0 && nFiltered > 0) {
-      const currentCompareValue = calculateKpiValueFromContext(
-        kpiTemplate.id,
-        currentPeriodAggregatedDRE,
-        null,
-        metaMediaB2,
-        peFinanceiroTotal,
-        { currentDRE: currentPeriodAggregatedDRE, previousDRE: previousPeriodAggregatedDRE } // Contexto para Alavancagem/Crescimento
-      );
-      const previousCompareValue = calculateKpiValueFromContext(
-        kpiTemplate.id,
-        previousPeriodAggregatedDRE,
-        null,
-        metaMediaB2,
-        peFinanceiroTotal,
-        { currentDRE: previousPeriodAggregatedDRE, previousDRE: null } // Não há previous para este previous
-      );
+      const currentCompareValue = calculateKpiValueFromContext(kpiTemplate.id, currentPeriodAggregatedDRE, null, metaMediaB2, peFinanceiroTotal, { currentDRE: currentPeriodAggregatedDRE, previousDRE: previousPeriodAggregatedDRE });
+      const previousCompareValue = calculateKpiValueFromContext(kpiTemplate.id, previousPeriodAggregatedDRE, null, metaMediaB2, peFinanceiroTotal, { currentDRE: previousPeriodAggregatedDRE, previousDRE: undefined });
 
       if (currentCompareValue !== null && previousCompareValue !== null && previousCompareValue !== 0) {
         comparisonDelta = currentCompareValue - previousCompareValue;
         const isPercentageKpi = kpiTemplate.unit === '%' || kpiTemplate.unit === 'x';
-
         const deltaMagnitude = isPercentageKpi ? safeDivide(comparisonDelta, previousCompareValue) * 100 : comparisonDelta;
-        
-        comparisonIsFavorable = !isCostKpi
-                                ? (deltaMagnitude || 0) > 0
-                                : (deltaMagnitude || 0) < 0;
+        comparisonIsFavorable = !isCostKpi ? (deltaMagnitude || 0) > 0 : (deltaMagnitude || 0) < 0;
         comparisonColorClass = comparisonIsFavorable ? 'text-green-400' : 'text-red-400';
-
         const prefix = deltaMagnitude > 0 ? '+' : '';
         if (kpiTemplate.id === 'kpi_markup') {
           comparisonDeltaFormatted = `${prefix}${round(deltaMagnitude, 2)}x ${comparisonDelta > 0 ? 'à mais' : 'à menos'} que o período anterior`;
@@ -340,12 +264,8 @@ export const calculateAllKpis = (
         comparisonDelta = currentDailyValue - previousDailyValue;
         const isPercentageKpi = kpiTemplate.unit === '%';
         const deltaMagnitude = isPercentageKpi ? safeDivide(comparisonDelta, previousDailyValue) * 100 : comparisonDelta;
-
-        comparisonIsFavorable = !isCostKpi
-                                ? (deltaMagnitude || 0) > 0
-                                : (deltaMagnitude || 0) < 0;
+        comparisonIsFavorable = !isCostKpi ? (deltaMagnitude || 0) > 0 : (deltaMagnitude || 0) < 0;
         comparisonColorClass = comparisonIsFavorable ? 'text-green-400' : 'text-red-400';
-
         const prefix = deltaMagnitude > 0 ? '+' : '';
         if (isPercentageKpi) {
           comparisonDeltaFormatted = `${prefix}${round(deltaMagnitude, 1)}% ${comparisonDelta > 0 ? 'à mais' : 'à menos'} que o mês passado`;
@@ -355,10 +275,8 @@ export const calculateAllKpis = (
       }
     }
 
-
-    // --- Define a Explicação da Referência (Benchmarks) ---
     let referenceExplanation: string;
-    const formattedMetaMediaB2 = formatCurrency(metaMediaB2); // Formata aqui para reuso
+    const formattedMetaMediaB2 = formatCurrency(metaMediaB2);
 
     switch (kpiTemplate.id) {
       case 'kpi_daily_accumulated': referenceExplanation = `Ref: Meta Média de ${formattedMetaMediaB2}`; break;
@@ -393,23 +311,14 @@ export const calculateAllKpis = (
       default: referenceExplanation = '';
     }
 
-    kpisWithValues.push({
-      ...kpiTemplate,
-      value,
-      comparisonDelta,
-      comparisonDeltaFormatted,
-      comparisonIsFavorable,
-      comparisonColorClass,
-      referenceExplanation
-    });
+    kpisWithValues.push({ ...kpiTemplate, value, comparisonDelta, comparisonDeltaFormatted, comparisonIsFavorable, comparisonColorClass, referenceExplanation });
   }
 
-  // Objeto de auditoria para meta mensal base
   const auditoriaMeta: AuditoriaMeta = {
     metodologia: `Meta calculada com base no filtro de ${filterMonths} meses, utilizando a soma das Receitas Brutas dividida por ${nFiltered}.`,
     formulaMeta: `Meta = (∑ Receita Bruta (B2) do período filtrado) / ${nFiltered}`,
-    valorMeta: metaMediaB2, // O valor exato resultante da meta média
-    numMesesBase: nFiltered, // O número real de meses usados no cálculo
+    valorMeta: metaMediaB2,
+    numMesesBase: nFiltered,
   };
 
   return { kpis: kpisWithValues, auditoriaMeta };

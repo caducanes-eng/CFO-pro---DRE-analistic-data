@@ -31,7 +31,7 @@ const extractDataFromRawString = (raw: string): Partial<MonthlyParsedData> => {
   const parsed: any = {};
   const lines = raw.split('\n');
 
-  // Definição de mapeamento inteligente por palavra-chave
+  // Definição de mapeamento inteligente por palavra-chave - REPARAÇÃO CIRÚRGICA (Mapeamento Admin e Comissões)
   const mappings = [
     { key: 'taxes', keyPct: 'taxesPercent', regex: /(?:IMPOSTOS|B4|C4)/i },
     { key: 'grossRevenue', keyPct: null, regex: /(?:RECEITA\s*BRUTA|FATURAMENTO|B2)/i },
@@ -46,6 +46,8 @@ const extractDataFromRawString = (raw: string): Partial<MonthlyParsedData> => {
     { key: 'netProfit', keyPct: null, regex: /(?:LUCRO\s*LÍQUIDO|RESULTADO|B27)/i },
     { key: 'personnelCost', keyPct: null, regex: /(?:PESSOAL|FIXO|FOLHA|B19)/i },
     { key: 'occupancyCost', keyPct: 'occupancyCostPercent', regex: /(?:OCUPAÇÃO|ALUGUEL|B20)/i },
+    { key: 'adminCost', keyPct: 'adminCostPercent', regex: /(?:ADMINISTRATIVO|B21|C21)/i },
+    { key: 'commissions', keyPct: 'commissionPercent', regex: /(?:COMISS[OÕ]ES|B13|C13)/i },
     { id: 'markup', keyPct: null, regex: /(?:MARKUP|B9)/i }
   ];
 
@@ -111,6 +113,7 @@ const MonthlyEntryForm: React.FC<any> = ({ initialData, onSave, onCancel }) => {
     }));
   };
 
+  // REPARAÇÃO DA INTERFACE (UI): Exibição dos novos campos de Indicadores Verticais
   const fieldGroups = [
     { 
       title: "Financeiro Consolidado (R$)", 
@@ -131,14 +134,16 @@ const MonthlyEntryForm: React.FC<any> = ({ initialData, onSave, onCancel }) => {
         { id: 'cmvRatioPercent', label: 'CMV %' },
         { id: 'taxesPercent', label: 'Impostos %' },
         { id: 'contributionMarginPercent', label: 'Margem C. %' }, 
-        { id: 'grossMarginPercent', label: 'M. Bruta %' }
+        { id: 'grossMarginPercent', label: 'M. Bruta %' },
+        { id: 'adminCostPercent', label: 'Adm %' },
+        { id: 'commissionPercent', label: 'Comissão %' }
       ]
     }
   ];
 
   return (
     <div className="space-y-4">
-      {/* Seletor de Competência - Nova Adição */}
+      {/* Seletor de Competência */}
       <div className="bg-brand-surface border border-white/5 p-3 rounded-2xl flex items-center gap-3">
         <CalendarDays size={18} className="text-brand-primary shrink-0" />
         <div className="flex-grow">
