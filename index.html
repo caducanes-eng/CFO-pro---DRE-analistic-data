@@ -12,7 +12,6 @@
         theme: {
           extend: {
             colors: {
-              // Mapeamento dinâmico para as variáveis CSS injetadas pelo ThemeGenerator
               'brand-primary': 'var(--brand-primary)',
               'brand-secondary': 'var(--brand-secondary)',
               'brand-accent': 'var(--brand-accent)',
@@ -28,7 +27,6 @@
     
     <style>
       :root {
-        /* Valores padrão (Dourado Educale) - Sobrescritos pelo App.tsx */
         --brand-primary: #D4AF37;
         --brand-secondary: #B8860B;
         --brand-accent: #FFD700;
@@ -47,11 +45,9 @@
         overflow-x: hidden;
       }
 
-      /* Scrollbar Minimalista Adaptativa */
       ::-webkit-scrollbar { width: 3px; }
       ::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 10px; }
 
-      /* Ajuste de Inputs para Alta Nitidez */
       input, textarea, select {
         background-color: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -72,12 +68,18 @@
         padding-top: calc(var(--header-height) + 10px) !important;
         padding-bottom: calc(var(--nav-height) + 20px) !important;
       }
+
+      .auth-container {
+        min-height: 100vh;
+        background: radial-gradient(circle at top right, var(--brand-primary) 0%, transparent 40%), #000;
+      }
     </style>
 <script type="importmap">
 {
   "imports": {
     "recharts": "https://esm.sh/recharts@^3.7.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.42.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.39.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "lucide-react": "https://esm.sh/lucide-react@^0.575.0",
     "react/": "https://esm.sh/react@^19.2.4/",
