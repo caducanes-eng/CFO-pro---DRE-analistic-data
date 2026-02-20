@@ -11,7 +11,7 @@ interface DataEntryPageProps {
 }
 
 const DataEntryPage: React.FC<DataEntryPageProps> = ({ onAddDailyRegister, onAddMonthlyDRE }) => {
-  const [activeTab, setActiveTab] = useState<'daily' | 'monthly'>('monthly'); // Monthly como default para destaque
+  const [activeTab, setActiveTab] = useState<'daily' | 'monthly'>('monthly');
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSaveSuccess = () => {
@@ -23,8 +23,8 @@ const DataEntryPage: React.FC<DataEntryPageProps> = ({ onAddDailyRegister, onAdd
     <div className="px-3 space-y-2">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-lg font-black tracking-tighter uppercase leading-none">
-            CENTRAL <span className="text-[var(--brand-primary)]">ANALYTICS</span>
+          <h1 className="text-lg font-black tracking-tighter uppercase leading-none text-white">
+            CENTRAL <span className="text-brand-primary">ANALYTICS</span>
           </h1>
           <p className="text-[8px] text-[var(--brand-text-muted)] font-bold uppercase tracking-widest">
             Entrada de Dados Estratégicos
@@ -41,23 +41,27 @@ const DataEntryPage: React.FC<DataEntryPageProps> = ({ onAddDailyRegister, onAdd
       <div className="grid grid-cols-2 gap-1 bg-white/5 p-0.5 rounded-md border border-white/10">
         <button
           onClick={() => setActiveTab('daily')}
-          className={`flex items-center justify-center gap-2 py-1.5 rounded text-[9px] font-black uppercase transition-all ${
-            activeTab === 'daily' ? 'bg-[var(--brand-primary)] text-black' : 'text-white/20 hover:text-white/40'
+          className={`flex items-center justify-center gap-2 py-1.5 rounded text-[9px] font-black uppercase transition-all duration-300 ${
+            activeTab === 'daily' 
+              ? 'bg-brand-primary text-black shadow-lg' 
+              : 'text-white/20 hover:text-white/40'
           }`}
         >
           <Zap size={10} /> Vendas Diárias
         </button>
         <button
           onClick={() => setActiveTab('monthly')}
-          className={`flex items-center justify-center gap-2 py-1.5 rounded text-[9px] font-black uppercase transition-all ${
-            activeTab === 'monthly' ? 'bg-[var(--brand-primary)] text-black' : 'text-white/20 hover:text-white/40'
+          className={`flex items-center justify-center gap-2 py-1.5 rounded text-[9px] font-black uppercase transition-all duration-300 ${
+            activeTab === 'monthly' 
+              ? 'bg-brand-primary text-black shadow-lg' 
+              : 'text-white/20 hover:text-white/40'
           }`}
         >
           <Database size={10} /> Smart DRE
         </button>
       </div>
 
-      <div className="bg-[#0D0D0F] border border-white/5 rounded-lg p-2.5 shadow-2xl relative overflow-hidden">
+      <div className="bg-brand-surface border border-white/5 rounded-lg p-2.5 shadow-2xl relative overflow-hidden transition-colors duration-500">
         {activeTab === 'daily' ? (
           <DailyEntryForm onSave={(data) => { onAddDailyRegister(data); handleSaveSuccess(); }} />
         ) : (

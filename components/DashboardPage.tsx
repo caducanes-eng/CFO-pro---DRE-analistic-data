@@ -34,8 +34,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <div className="px-3 space-y-5">
-      {/* Seletor de Período Compacto */}
-      <section className="bg-brand-surface p-3 rounded-2xl border border-white/5">
+      {/* Seletor de Período - Agora adaptativo à brand-primary */}
+      <section className="bg-brand-surface p-3 rounded-2xl border border-white/5 shadow-lg">
         <div className="flex items-center gap-2 mb-3">
           <Calendar size={14} className="text-brand-primary" />
           <h2 className="text-[9px] font-black uppercase tracking-widest text-white/40">Filtro de Análise</h2>
@@ -45,8 +45,10 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             <button
               key={val}
               onClick={() => { setActiveFilter(val); setMesesFiltro(val); }}
-              className={`py-2 text-[10px] font-black rounded-lg border transition-all ${
-                activeFilter === val ? 'bg-brand-primary text-black border-brand-primary' : 'bg-white/5 text-white/40 border-white/5'
+              className={`py-2 text-[10px] font-black rounded-lg border transition-all duration-300 ${
+                activeFilter === val 
+                  ? 'bg-brand-primary text-black border-brand-primary shadow-[0_0_15px_rgba(var(--brand-primary-rgb),0.3)]' 
+                  : 'bg-white/5 text-white/40 border-white/5 hover:border-brand-primary/30'
               }`}
             >
               {val}M
@@ -55,32 +57,32 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </section>
 
-      {/* KPIs Diários - Grid 2 Colunas */}
+      {/* KPIs Diários */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 px-1">
           <Target size={18} className="text-brand-primary" />
-          <h2 className="text-lg font-black uppercase tracking-tighter">Vendas <span className="text-brand-primary">Hoje</span></h2>
+          <h2 className="text-lg font-black uppercase tracking-tighter text-white">Vendas <span className="text-brand-primary">Hoje</span></h2>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {kpisPerformance.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
         </div>
       </section>
 
-      {/* Saúde Financeira - Grid 2 Colunas */}
+      {/* Saúde Financeira */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 px-1">
           <Activity size={18} className="text-brand-primary" />
-          <h2 className="text-lg font-black uppercase tracking-tighter">Gestão <span className="text-brand-primary">DRE</span></h2>
+          <h2 className="text-lg font-black uppercase tracking-tighter text-white">Gestão <span className="text-brand-primary">DRE</span></h2>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {kpisFinanceiros.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
         </div>
       </section>
 
-      {/* IA Analysis - Destaque Visual */}
+      {/* IA Analysis */}
       <AiAnalysis kpis={kpis} primaryColor={primaryColor} />
 
-      {/* Gráficos em Full Width Mobile */}
+      {/* Gráficos */}
       <div className="space-y-4">
         {netRevenueChartData.length > 0 && (
           <LineChartComponent
@@ -93,7 +95,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         )}
       </div>
 
-      {/* Auditoria Meta - Compacto */}
+      {/* Auditoria Meta */}
       <section className="bg-brand-surface/40 p-4 rounded-2xl border border-white/5 border-dashed">
         <div className="flex items-center gap-2 mb-2">
           <Megaphone size={14} className="text-brand-primary" />

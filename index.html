@@ -12,8 +12,11 @@
         theme: {
           extend: {
             colors: {
-              'brand-primary': '#D4AF37',
-              'brand-surface': '#0D0D0F',
+              // Mapeamento dinâmico para as variáveis CSS injetadas pelo ThemeGenerator
+              'brand-primary': 'var(--brand-primary)',
+              'brand-secondary': 'var(--brand-secondary)',
+              'brand-accent': 'var(--brand-accent)',
+              'brand-surface': 'var(--brand-surface)',
               'brand-bg-black': '#000000',
             }
           }
@@ -25,21 +28,26 @@
     
     <style>
       :root {
+        /* Valores padrão (Dourado Educale) - Sobrescritos pelo App.tsx */
         --brand-primary: #D4AF37;
+        --brand-secondary: #B8860B;
+        --brand-accent: #FFD700;
         --brand-surface: #0D0D0F;
+        --brand-text-light: #E0E0E0;
+        --brand-text-muted: rgba(255, 255, 255, 0.6);
         --header-height: 40px;
         --nav-height: 70px;
       }
 
       body {
         background-color: #000000;
-        color: #F0F0F0;
+        color: var(--brand-text-light);
         font-family: 'Inter', sans-serif;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
 
-      /* Scrollbar Minimalista */
+      /* Scrollbar Minimalista Adaptativa */
       ::-webkit-scrollbar { width: 3px; }
       ::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 10px; }
 
@@ -49,20 +57,15 @@
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 6px !important;
         padding: 8px 10px !important;
-        font-size: 13px !important; /* Melhor legibilidade mobile */
+        font-size: 13px !important;
         transition: all 0.2s ease;
+        color: var(--brand-text-light) !important;
       }
 
       input:focus, textarea:focus {
         border-color: var(--brand-primary) !important;
         box-shadow: 0 0 0 1px var(--brand-primary);
         background-color: rgba(212, 175, 55, 0.05) !important;
-      }
-
-      /* Títulos Mobile Compactos */
-      h1, h2 {
-        letter-spacing: -0.02em;
-        line-height: 1;
       }
 
       main {
